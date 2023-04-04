@@ -20,7 +20,24 @@ snowsql_config_file_mapping = {
 "warehousename" : "warehouse"
 }
 
+def add_import(session:Session,package):
+    from snowflake.snowpark._internal import utils
+    if utils.PLATFORM == "XP":
+        import sys, os, zipfile
+        IMPORT_DIR = sys._xoptions["snowflake_import_directory"]
+        lib = os.path.basename(package.__path__[-1][0:-1 * len(package.__name__)])
+        end = (-1 * len(package.__name__) - 1)
+        lib = os.path.basename(package.__path__[-1][:end])
+        TARGER_FOLDER=f"/tmp/{lib}/"
+        os.makedirs(TARGER_FOLDER,exist_ok=True)
+        with zipfile.ZipFile(f'{IMPORT_DIR}{lib}', 'r') as zip_ref:
+                zip_ref.extractall(TARGER_FOLDER)
+        session.add_import(TARGER_FOLDER)
+    else:
+        session.add_import(package.__path__[-1], package.__name__)
 
+
+      
 
 def get_session(use_properties_file:bool=False,environment="dev", app_config_path:Path = Path.cwd().joinpath("app.toml"),query_tag=None)->Session:
     """

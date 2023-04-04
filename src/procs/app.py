@@ -6,7 +6,7 @@ and testing.
 from snowflake.snowpark.session import Session
 from snowflake.snowpark.dataframe import col, DataFrame
 from snowflake.snowpark.types import StringType
-
+from util.local import add_import
 
 def run(snowpark_session: Session) -> int:
     """
@@ -17,7 +17,7 @@ def run(snowpark_session: Session) -> int:
     # Register UDF
     import udf
     # this works locally but fails in snow proc
-    snowpark_session.add_import(udf.__path__[0])
+    add_import(snowpark_session,udf)
     combine = snowpark_session.udf.register(
         udf.functions.combine, StringType(), input_types=[StringType(), StringType()]
     )
@@ -40,6 +40,7 @@ def run(snowpark_session: Session) -> int:
 
 
 if __name__ == "__main__":
+
     # This entrypoint is used for local development.
     import sys
     import logging
