@@ -15,13 +15,11 @@ def run(snowpark_session: Session) -> int:
     """
 
     # Register UDF
-    from src.udf.functions import combine
-
-    snowpark_session.add_import(
-        path="../src/udf/functions.py", import_path="src.udf.functions"
-    )
+    import udf
+    # this works locally but fails in snow proc
+    snowpark_session.add_import(udf.__path__[0])
     combine = snowpark_session.udf.register(
-        combine, StringType(), input_types=[StringType(), StringType()]
+        udf.functions.combine, StringType(), input_types=[StringType(), StringType()]
     )
 
     schema = ["col_1", "col_2"]
@@ -43,15 +41,13 @@ def run(snowpark_session: Session) -> int:
 
 if __name__ == "__main__":
     # This entrypoint is used for local development.
-
     import sys
-
-    sys.path.insert(0, "..")  # Necessary to import from udf and util directories
-
-    from src.util.local import get_env_var_config
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    from util.local import get_session
 
     print("Creating session...")
-    session = Session.builder.configs(get_env_var_config()).create()
+    session = get_session(True)
 
     print("Running stored proc...")
     run(session)
