@@ -2,6 +2,8 @@
 This module provides utilities for local development and testing.
 """
 
+from snowflake.snowpark import Session
+
 from pathlib import Path
 from os import environ
 
@@ -54,3 +56,30 @@ def get_dev_config(
             "Error creating snowpark session - be sure you've logged into "
             "the SnowCLI and have a valid app.toml file",
         ) from exc
+
+
+def add_import(session:Session,package):
+    from snowflake.snowpark._internal import utils
+    if utils.is_in_stored_procedure():
+        import sys, os, zipfile
+        IMPORT_DIR = sys._xoptions["snowflake_import_directory"]
+        EXT=".zip"
+        idx = package.__path__[-1].rfind(EXT) 
+        if idx == -1:
+            EXT = ".py"
+            idx = package.__path__[-1].rfind(".py")
+        if idx == -1:
+            raise Exception("Cannot .py .zip in package import")
+        end = idx + len(EXT)
+        path_to_lib=package.__path__[-1][:end]
+        lib = os.path.basename(path_to_lib)
+        if EXT=='.zip':
+            TARGET_FOLDER=f"/tmp/{lib}"
+            os.makedirs(TARGET_FOLDER,exist_ok=True)
+            with zipfile.ZipFile(f'{IMPORT_DIR}{lib}', 'r') as zip_ref:
+                    zip_ref.extractall(TARGET_FOLDER)
+            session.add_import(TARGET_FOLDER)
+        elif EXT == ".py":
+            session.add_import(path_to_lib)
+    else:
+        session.add_import(package.__path__[-1], package.__name__)

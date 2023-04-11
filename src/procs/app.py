@@ -6,7 +6,7 @@ and testing.
 from snowflake.snowpark.session import Session
 from snowflake.snowpark.dataframe import col, DataFrame
 from snowflake.snowpark.types import StringType
-
+from src.util.local import add_import
 
 def run(snowpark_session: Session) -> int:
     """
@@ -15,13 +15,14 @@ def run(snowpark_session: Session) -> int:
     """
 
     # Register UDF
-    from src.udf.functions import combine
+    from src.udf import functions
 
+    # add_import(snowpark_session, functions)
     snowpark_session.add_import(
         path="../src/udf/functions.py", import_path="src.udf.functions"
     )
     combine = snowpark_session.udf.register(
-        combine, StringType(), input_types=[StringType(), StringType()]
+        functions.combine, StringType(), input_types=[StringType(), StringType()]
     )
 
     schema = ["col_1", "col_2"]
@@ -43,10 +44,6 @@ def run(snowpark_session: Session) -> int:
 
 if __name__ == "__main__":
     # This entrypoint is used for local development.
-
-    import sys
-
-    sys.path.insert(0, "..")  # Necessary to import from udf and util directories
 
     from src.util.local import get_env_var_config
 
