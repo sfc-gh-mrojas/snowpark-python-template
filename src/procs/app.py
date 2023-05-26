@@ -5,8 +5,7 @@ and testing.
 
 from snowflake.snowpark.session import Session
 from snowflake.snowpark.dataframe import col, DataFrame
-from snowflake.snowpark.types import StringType
-
+from src.util.log_example import some_utility_method
 
 def run(snowpark_session: Session) -> DataFrame:
     """
@@ -29,6 +28,10 @@ def run(snowpark_session: Session) -> DataFrame:
     df2 = df.select(combine(col("col_1"), col("col_2")).as_("hello_world")).sort(
         "hello_world", ascending=False
     )
+
+    # I call a transformer here, and this method has some logging statements in it.
+    df2 = some_utility_method(df2)
+    # Do the log statements in here go into event table?
 
     return df2
 
