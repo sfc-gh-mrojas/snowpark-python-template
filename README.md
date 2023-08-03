@@ -26,6 +26,7 @@ $env:SNOWSQL_SCHEMA = "<replace with your schema>"
 $env:SNOWSQL_WAREHOUSE = "<replace with your warehouse>"
 ```
 
+
 Optional: You can set this env var permanently by editing your bash profile (on Linux/MacOS) or 
 using the System Properties menu (on Windows).
 
@@ -43,6 +44,8 @@ conda activate snowpark
 #### VS Code
 
 Press `Ctrl`+`Shift`+`P` to open the command palette, then select **Python: Select Interpreter** and select the **snowpark** interpeter under the **Conda** list.
+
+> NOTE: VS Code is a very customizable IDE. Under the `.vscode` folder you can find some files like (.settings.json, launch.json) those files can use to setup the VSCode terminal, debugger and other IDE settings. See https://code.visualstudio.com/docs/python/environments for more details. 
 
 #### PyCharm
 
@@ -83,10 +86,27 @@ You can run the test suite locally from the project root:
 python -m pytest
 ```
 
+### Packaging your application for deployment
+
+Snowpark allows you to package your application as a zip for deployment. A simple way to package your app will be:
+```
+python setup.py bdist_wheel
+for file in dist/*.whl; do mv -- "$file" "${file%.whl}.zip"; done
+```
+
+On Windows Command Prompt:
+```
+python setup.py bdist_wheel
+for %i in (dist\*.whl) do ren "%i" "%~ni.zip"
+```
+Now your code is ready to be upload into an stage
+
 ### Deploy to Snowflake
 
 The GitHub Actions [workflow file](.github/workflows/build-and-deploy.yml) allows you to continously deploy your objects to Snowflake. When you're ready,
 create secrets in your GitHub repository with the same name and values as the environment variables you created earler (`SNOWSQL_PWD`, `SNOWSQL_ACCOUNT`, etc.). The workflow will create a stage, upload the Python source code, and create the stored procedure object. For more information, see [`resources.sql`](resources.sql).
+
+
 
 ## Project Structure
 

@@ -5,8 +5,12 @@ install of this project
 
 from setuptools import setup, find_packages
 
+PACKAGE_NAME = "project1"
 setup(
-    name="Example Snowpark Python project",
+    name=PACKAGE_NAME,
     version="0.1.0",
-    packages=find_packages()
+     # Specify the package directory
+    package_dir={'': 'src'},
+    # Include all files from the src directory
+    package_data={PACKAGE_NAME: ['*']}
 )

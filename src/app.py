@@ -2,11 +2,10 @@
 An example stored procedure. __main__ provides an entrypoint for local development
 and testing.
 """
-
 from snowflake.snowpark.session import Session
 from snowflake.snowpark.dataframe import col, DataFrame
 from snowflake.snowpark.functions import udf
-from src.functions import combine
+import functions
 
 def run(snowpark_session: Session) -> DataFrame:
     """
@@ -14,7 +13,7 @@ def run(snowpark_session: Session) -> DataFrame:
     console, and returns the number of rows in the table.
     """
 
-    combine_udf = udf(combine)
+    combine_udf = udf(functions.combine)
 
     schema = ["col_1", "col_2"]
 
@@ -34,12 +33,13 @@ def run(snowpark_session: Session) -> DataFrame:
 
 if __name__ == "__main__":
     # This entrypoint is used for local development (`$ python src/procs/app.py`)
-
-    from src.util.local import get_env_var_config
+    # make sure PYTHONPATH is pointing to ./src/
+    # and also current directory is ./src/ for this example to work
+    from util.local import get_env_var_config
 
     print("Creating session...")
     session = Session.builder.configs(get_env_var_config()).create()
-    session.add_import("src/functions.py", 'src.functions')
+    session.add_import(functions.__file__, 'functions')
 
     print("Running stored procedure...")
     result = run(session)

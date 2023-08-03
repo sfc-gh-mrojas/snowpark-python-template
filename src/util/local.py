@@ -3,7 +3,7 @@ This module provides utilities for local development and testing.
 """
 
 from pathlib import Path
-from os import environ
+from os import getenv, environ
 
 import configparser
 import toml
@@ -16,13 +16,13 @@ def get_env_var_config() -> dict:
     """
     try:
         return {
-            "user": environ["SNOWSQL_USER"],
-            "password": environ["SNOWSQL_PWD"],
-            "account": environ["SNOWSQL_ACCOUNT"],
-            # "role": environ["SNOWSQL_ROLE"],
+            "user"     : environ["SNOWSQL_USER"],
+            "password" : environ["SNOWSQL_PWD"],
+            "account"  : environ["SNOWSQL_ACCOUNT"],
+            "role"     : getenv("SNOWSQL_ROLE"), # getenv allow variable to be optional
             "warehouse": environ["SNOWSQL_WAREHOUSE"],
-            "database": environ["SNOWSQL_DATABASE"],
-            "schema": environ["SNOWSQL_SCHEMA"],
+            "database" : environ["SNOWSQL_DATABASE"],
+            "schema"   : environ["SNOWSQL_SCHEMA"],
         }
     except KeyError as exc:
         raise KeyError(
